@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F1 Wiki</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- Navigation -->
+  <nav>
+    <span class="nav-brand">&#9872; F1 Wiki</span>
+    <button v-for="tab in tabs" :key="tab"
+            :class="{ active: activeTab === tab }"
+            @click="activeTab = tab">
+      {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
+    </button>
+    <div class="nav-right">
+      <button class="btn btn-secondary btn-sm" @click="importData">&#8595; Import JSON</button>
+      <button class="btn btn-secondary btn-sm" @click="exportData">&#8593; Export JSON</button>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ── Seasons ──────────────────────────────────────────────────────── -->
+    <section v-show="activeTab === 'seasons'">
+      <div class="section-header">
+        <h2>Seasons</h2>
+        <button class="btn btn-primary" @click="openSeasonModal()">+ Add Season</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Year</th><th>Regulation</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr v-if="seasons.length === 0"><td colspan="4"><div class="empty">No seasons yet.</div></td></tr>
+            <tr v-for="s in seasons" :key="s.id">
+              <td><span class="badge">{{ s.id }}</span></td>
+              <td><strong>{{ s.year }}</strong></td>
+              <td>{{ s.regulation || '—' }}</td>
+              <td><div class="actions">
+                <button class="btn btn-secondary btn-sm" @click="openSeasonModal(s)">Edit</button>
+                <button class="btn btn-danger btn-sm" @click="deleteSeason(s.id)">Delete</button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Teams ────────────────────────────────────────────────────────── -->
+    <section v-show="activeTab === 'teams'">
+      <div class="section-header">
+        <h2>Teams</h2>
+        <button class="btn btn-primary" @click="openTeamModal()">+ Add Team</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Country</th><th>Director</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr v-if="teams.length === 0"><td colspan="5"><div class="empty">No teams yet.</div></td></tr>
+            <tr v-for="t in teams" :key="t.id">
+              <td><span class="badge">{{ t.id }}</span></td>
+              <td><strong>{{ t.name }}</strong></td>
+              <td>{{ t.country || '—' }}</td>
+              <td>{{ t.director || '—' }}</td>
+              <td><div class="actions">
+                <button class="btn btn-secondary btn-sm" @click="openTeamModal(t)">Edit</button>
+                <button class="btn btn-danger btn-sm" @click="deleteTeam(t.id)">Delete</button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Pilots ────────────────────────────────────────────────────────── -->
+    <section v-show="activeTab === 'pilots'">
+      <div class="section-header">
+        <h2>Pilots</h2>
+        <button class="btn btn-primary" @click="openPilotModal()">+ Add Pilot</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Country</th><th>Team</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr v-if="pilots.length === 0"><td colspan="5"><div class="empty">No pilots yet.</div></td></tr>
+            <tr v-for="p in pilots" :key="p.id">
+              <td><span class="badge">{{ p.id }}</span></td>
+              <td><strong>{{ p.name }}</strong></td>
+              <td>{{ p.country || '—' }}</td>
+              <td>{{ p.team_name || '—' }}</td>
+              <td><div class="actions">
+                <button class="btn btn-secondary btn-sm" @click="openPilotModal(p)">Edit</button>
+                <button class="btn btn-danger btn-sm" @click="deletePilot(p.id)">Delete</button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Circuits ──────────────────────────────────────────────────────── -->
+    <section v-show="activeTab === 'circuits'">
+      <div class="section-header">
+        <h2>Circuits</h2>
+        <button class="btn btn-primary" @click="openCircuitModal()">+ Add Circuit</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Country</th><th>Length (km)</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr v-if="circuits.length === 0"><td colspan="5"><div class="empty">No circuits yet.</div></td></tr>
+            <tr v-for="c in circuits" :key="c.id">
+              <td><span class="badge">{{ c.id }}</span></td>
+              <td><strong>{{ c.name }}</strong></td>
+              <td>{{ c.country || '—' }}</td>
+              <td>{{ c.length_km || '—' }}</td>
+              <td><div class="actions">
+                <button class="btn btn-secondary btn-sm" @click="openCircuitModal(c)">Edit</button>
+                <button class="btn btn-danger btn-sm" @click="deleteCircuit(c.id)">Delete</button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Grand Prix ─────────────────────────────────────────────────────── -->
+    <section v-show="activeTab === 'grandprix'">
+      <div class="section-header">
+        <h2>Grand Prix</h2>
+        <button class="btn btn-primary" @click="openGPModal()">+ Add Grand Prix</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Season</th><th>Circuit</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr v-if="grandPrixList.length === 0"><td colspan="6"><div class="empty">No Grand Prix events yet.</div></td></tr>
+            <tr v-for="gp in grandPrixList" :key="gp.id">
+              <td><span class="badge">{{ gp.id }}</span></td>
+              <td><strong>{{ gp.name }}</strong></td>
+              <td>{{ gp.season_year || gp.season_id }}</td>
+              <td>{{ gp.circuit_name || gp.circuit_id }}</td>
+              <td>{{ gp.date }}</td>
+              <td><div class="actions">
+                <button class="btn btn-secondary btn-sm" @click="openGPModal(gp)">Edit</button>
+                <button class="btn btn-danger btn-sm" @click="deleteGP(gp.id)">Delete</button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Results ────────────────────────────────────────────────────────── -->
+    <section v-show="activeTab === 'results'">
+      <div class="section-header">
+        <h2>Results</h2>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <select v-model="selectedGP" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:7px 12px;font-size:.9rem;">
+            <option value="">All Grand Prix</option>
+            <option v-for="gp in grandPrixList" :key="gp.id" :value="gp.id">{{ gp.name }} ({{ gp.season_year || gp.season_id }})</option>
+          </select>
+          <button class="btn btn-primary" @click="openResultModal()">+ Add Result</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Pilot</th><th>Pos.</th><th>Points</th><th>Fastest Lap</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr v-if="results.length === 0"><td colspan="6"><div class="empty">No results yet.</div></td></tr>
+            <tr v-for="r in results" :key="r.id">
+              <td><span class="badge">{{ r.id }}</span></td>
+              <td>{{ r.pilot_name || r.pilot_id }}</td>
+              <td>{{ r.finish_position ?? '—' }}</td>
+              <td>{{ r.points ?? '—' }}</td>
+              <td>{{ r.fastest_lap ? '&#9889;' : '' }}</td>
+              <td><div class="actions">
+                <button class="btn btn-danger btn-sm" @click="deleteResult(r.id)">Delete</button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Modal ────────────────────────────────────────────────────────────── -->
+  <div class="modal-backdrop" v-if="modal.open" @click.self="closeModal">
+    <div class="modal">
+
+      <!-- Season form -->
+      <template v-if="modal.entity === 'season'">
+        <h3>{{ modal.mode === 'create' ? 'Add Season' : 'Edit Season' }}</h3>
+        <div class="form-group"><label>Year *</label><input type="number" v-model="modal.data.year" placeholder="2024" /></div>
+        <div class="form-group"><label>Regulation</label><input type="text" v-model="modal.data.regulation" placeholder="Technical regulation details..." /></div>
+      </template>
+
+      <!-- Team form -->
+      <template v-if="modal.entity === 'team'">
+        <h3>{{ modal.mode === 'create' ? 'Add Team' : 'Edit Team' }}</h3>
+        <div class="form-group"><label>Name *</label><input type="text" v-model="modal.data.name" placeholder="Red Bull Racing" /></div>
+        <div class="form-group"><label>Country</label><input type="text" v-model="modal.data.country" placeholder="Austria" /></div>
+        <div class="form-group"><label>Director</label><input type="text" v-model="modal.data.director" placeholder="Christian Horner" /></div>
+      </template>
+
+      <!-- Pilot form -->
+      <template v-if="modal.entity === 'pilot'">
+        <h3>{{ modal.mode === 'create' ? 'Add Pilot' : 'Edit Pilot' }}</h3>
+        <div class="form-group"><label>Name *</label><input type="text" v-model="modal.data.name" placeholder="Max Verstappen" /></div>
+        <div class="form-group"><label>Country</label><input type="text" v-model="modal.data.country" placeholder="Netherlands" /></div>
+        <div class="form-group"><label>Team</label>
+          <select v-model="modal.data.team_id">
+            <option value="">— No team —</option>
+            <option v-for="t in teams" :key="t.id" :value="t.id">{{ t.name }}</option>
+          </select>
+        </div>
+      </template>
+
+      <!-- Circuit form -->
+      <template v-if="modal.entity === 'circuit'">
+        <h3>{{ modal.mode === 'create' ? 'Add Circuit' : 'Edit Circuit' }}</h3>
+        <div class="form-group"><label>Name *</label><input type="text" v-model="modal.data.name" placeholder="Monza" /></div>
+        <div class="form-group"><label>Country</label><input type="text" v-model="modal.data.country" placeholder="Italy" /></div>
+        <div class="form-group"><label>Length (km)</label><input type="number" step="0.001" v-model="modal.data.length_km" placeholder="5.793" /></div>
+      </template>
+
+      <!-- Grand Prix form -->
+      <template v-if="modal.entity === 'grandprix'">
+        <h3>{{ modal.mode === 'create' ? 'Add Grand Prix' : 'Edit Grand Prix' }}</h3>
+        <div class="form-group"><label>Name *</label><input type="text" v-model="modal.data.name" placeholder="Italian Grand Prix" /></div>
+        <div class="form-group"><label>Season *</label>
+          <select v-model="modal.data.season_id">
+            <option value="">— Select season —</option>
+            <option v-for="s in seasons" :key="s.id" :value="s.id">{{ s.year }}</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Circuit *</label>
+          <select v-model="modal.data.circuit_id">
+            <option value="">— Select circuit —</option>
+            <option v-for="c in circuits" :key="c.id" :value="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Date *</label><input type="date" v-model="modal.data.date" /></div>
+      </template>
+
+      <!-- Result form -->
+      <template v-if="modal.entity === 'result'">
+        <h3>Add Result</h3>
+        <div class="form-group"><label>Grand Prix *</label>
+          <select v-model="modal.data.grand_prix_id">
+            <option value="">— Select Grand Prix —</option>
+            <option v-for="gp in grandPrixList" :key="gp.id" :value="gp.id">{{ gp.name }}</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Pilot *</label>
+          <select v-model="modal.data.pilot_id">
+            <option value="">— Select pilot —</option>
+            <option v-for="p in pilots" :key="p.id" :value="p.id">{{ p.name }}</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Finish position</label><input type="number" v-model="modal.data.finish_position" placeholder="1" /></div>
+        <div class="form-group"><label>Points</label><input type="number" step="0.5" v-model="modal.data.points" placeholder="25" /></div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="fl" v-model="modal.data.fastest_lap" style="width:auto;" />
+          <label for="fl" style="margin:0;cursor:pointer;">Fastest lap</label>
+        </div>
+      </template>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" @click="closeModal">Cancel</button>
+        <button class="btn btn-primary" @click="saveModal">{{ modal.mode === 'create' ? 'Create' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toasts ────────────────────────────────────────────────────────────── -->
+  <div class="toast-wrap">
+    <div v-for="t in toasts" :key="t.id" :class="['toast', t.type]">{{ t.msg }}</div>
+  </div>
+
+</div>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "teams": [
+    {
+      "id": 1,
+      "name": "max verstapen",
+      "country": "Netherlands"
+    },
+    {
+      "id": 2,
+      "name": "Niko Gulchenberg",
+      "country": "Germany"
+    }
+  ],
+  "pilots": [
+    {
+      "id": 1,
+      "name": "Valtery Bottas",
+      "country": "Italy",
+      "team": "max verstapen"
+    },
+    {
+      "id": 2,
+      "name": "Russel",
+      "country": "Amiraca",
+      "team": "max verstapen"
+    }
+  ],
+  "grandprix": []
+}
