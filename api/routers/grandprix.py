@@ -9,17 +9,20 @@ router = APIRouter(prefix="/grandprix", tags=["grandprix"])
 
 @router.get("/", response_model=list[GrandPrixRead])
 def list_grand_prixs(db: Session = Depends(get_db)):
+    # Повертає всі гонки з назвами сезону та траси
     return [GrandPrixRead.from_orm_full(gp) for gp in crud.get_grand_prixs(db)]
 
 
 @router.post("/", response_model=GrandPrixRead, status_code=status.HTTP_201_CREATED)
 def create_grand_prix(body: GrandPrixCreate, db: Session = Depends(get_db)):
+    # Створює нову гонку Гран-прі
     gp = crud.create_grand_prix(db, name=body.name, season_id=body.season_id, circuit_id=body.circuit_id, date=body.date)
     return GrandPrixRead.from_orm_full(gp)
 
 
 @router.get("/{gp_id}", response_model=GrandPrixRead)
 def get_grand_prix(gp_id: int, db: Session = Depends(get_db)):
+    # Повертає гонку за ID або 404
     gp = crud.get_grand_prix(db, gp_id)
     if gp is None:
         raise HTTPException(status_code=404, detail="Grand Prix not found")
@@ -28,6 +31,7 @@ def get_grand_prix(gp_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{gp_id}", response_model=GrandPrixRead)
 def update_grand_prix(gp_id: int, body: GrandPrixUpdate, db: Session = Depends(get_db)):
+    # Оновлює поля гонки (тільки передані значення)
     gp = crud.update_grand_prix(db, gp_id, name=body.name, season_id=body.season_id, circuit_id=body.circuit_id, date=body.date)
     if gp is None:
         raise HTTPException(status_code=404, detail="Grand Prix not found")
@@ -36,5 +40,6 @@ def update_grand_prix(gp_id: int, body: GrandPrixUpdate, db: Session = Depends(g
 
 @router.delete("/{gp_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_grand_prix(gp_id: int, db: Session = Depends(get_db)):
+    # Видаляє гонку або повертає 404
     if not crud.delete_grand_prix(db, gp_id):
         raise HTTPException(status_code=404, detail="Grand Prix not found")

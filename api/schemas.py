@@ -75,6 +75,7 @@ class PilotRead(PilotBase):
 
     @classmethod
     def from_orm_with_team(cls, pilot):
+        # Будує схему з іменем команди, підтягнутим через relationship
         data = {
             "id": pilot.id,
             "name": pilot.name,
@@ -139,6 +140,7 @@ class GrandPrixRead(GrandPrixBase):
 
     @classmethod
     def from_orm_full(cls, gp):
+        # Додає рік сезону та назву траси до відповіді
         return cls(
             id=gp.id,
             name=gp.name,
@@ -171,6 +173,7 @@ class ResultRead(ResultBase):
 
     @classmethod
     def from_orm_full(cls, r):
+        # Додає ім'я пілота до відповіді замість лише pilot_id
         return cls(
             id=r.id,
             grand_prix_id=r.grand_prix_id,

@@ -13,12 +13,14 @@ from api.routers import seasons, teams, pilots, circuits, grandprix, results
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Ініціалізує таблиці БД при старті сервера
     init_db()
     yield
 
 
 app = FastAPI(title="F1 Wiki API", version="1.0.0", lifespan=lifespan)
 
+# Дозволяє запити з будь-якого походження (для фронтенду на Vue)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,6 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Підключає роутери всіх ресурсів
 app.include_router(seasons.router)
 app.include_router(teams.router)
 app.include_router(pilots.router)
@@ -36,11 +39,13 @@ app.include_router(results.router)
 
 @app.get("/")
 def root():
+    # Базовий endpoint — перевірка що API працює
     return {"message": "F1 Wiki API", "docs": "/docs"}
 
 
 @app.post("/import-json")
 def import_data(path: str = "data.json", db: Session = Depends(get_db)):
+    # Імпортує дані з JSON-файлу (сумісність з Lab 1-3) в БД
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail=f"File not found: {path}")
     counts = import_json(path, db)
@@ -49,6 +54,7 @@ def import_data(path: str = "data.json", db: Session = Depends(get_db)):
 
 @app.get("/export-json")
 def export_data(db: Session = Depends(get_db)):
+    # Експортує всі таблиці БД у тимчасовий JSON-файл і повертає його
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8")
     tmp.close()
     export_json(tmp.name, db)

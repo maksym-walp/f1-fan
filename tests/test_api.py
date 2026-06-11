@@ -18,6 +18,7 @@ TestingSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def override_get_db():
+    # Підміняє get_db dependency на тестову сесію
     db = TestingSession()
     try:
         yield db
@@ -27,6 +28,7 @@ def override_get_db():
 
 @pytest.fixture(autouse=True)
 def setup_db():
+    # Перед кожним тестом створює таблиці, після — видаляє
     Base.metadata.create_all(bind=engine)
     app.dependency_overrides[get_db] = override_get_db
     yield
@@ -36,6 +38,7 @@ def setup_db():
 
 @pytest.fixture
 def client():
+    # HTTP-клієнт для тестування endpoints FastAPI
     return TestClient(app)
 
 

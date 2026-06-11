@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from db.database import Base
 
 
+# Сезон F1 — прив'язує гонки до конкретного року та регламенту
 class Season(Base):
     __tablename__ = "Season"
 
@@ -13,6 +14,7 @@ class Season(Base):
     grand_prixs = relationship("GrandPrix", back_populates="season")
 
 
+# Команда-конструктор
 class Team(Base):
     __tablename__ = "Team"
 
@@ -24,6 +26,7 @@ class Team(Base):
     pilots = relationship("Pilot", back_populates="team")
 
 
+# Пілот, пов'язаний з командою (nullable — може бути без команди)
 class Pilot(Base):
     __tablename__ = "Pilot"
 
@@ -37,6 +40,7 @@ class Pilot(Base):
     results = relationship("Result", back_populates="pilot")
 
 
+# Траса з довжиною кола та фото
 class Circuit(Base):
     __tablename__ = "Circuit"
 
@@ -49,6 +53,7 @@ class Circuit(Base):
     grand_prixs = relationship("GrandPrix", back_populates="circuit")
 
 
+# Гонка Гран-прі: прив'язана до сезону та траси
 class GrandPrix(Base):
     __tablename__ = "GrandPrix"
 
@@ -63,6 +68,7 @@ class GrandPrix(Base):
     results = relationship("Result", back_populates="grand_prix")
 
 
+# Результат пілота в конкретній гонці: позиція, очки, найшвидше коло
 class Result(Base):
     __tablename__ = "Result"
 

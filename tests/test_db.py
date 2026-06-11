@@ -8,6 +8,7 @@ from db import models, crud
 
 @pytest.fixture
 def db():
+    # Створює ізольовану in-memory SQLite БД для кожного тесту
     engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
     Base.metadata.create_all(bind=engine)
     Session = sessionmaker(bind=engine)
